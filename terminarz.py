@@ -1,39 +1,71 @@
 import random
 
-path = "teams.txt"
-f =open(path, "r", encoding="utf-8")
+def importFile():
+    path = "teams.txt"
+    f = open(path, "r", encoding="utf-8")
 
-# teams - list of imported clubs from file
-teams = []
+    # teams - list of imported clubs from file
+    teams = []
 
-# here I import clubs, atrr strip() - delete char of new line
-for line in f:
-    line = line.strip("\n")
-    teams.append(line)
+    # here I import clubs, atrr strip() - delete char of new line
+    for line in f:
+        line = line.strip("\n")
+        teams.append(line)
 
-# shuffle element in list
-random.shuffle(teams)
+    if len(teams) % 2 != 0:
+        teams.append("X")
 
-# schedule - list with another lists in correct order
-schedule = []
+    return teams
 
-# add first
-schedule.append(teams)
-print(schedule)
+def makeSchedule(teams):
+    # shuffle element in list
+    random.shuffle(teams)
 
-old_day = teams.copy()
-end = len(teams) -1
+    # schedule - list with another lists in correct order
+    schedule = []
 
-# add another days -> days: n-1 , where n is count of clubs
-for day in range(1,end):
+    # add first
+    schedule.append(teams)
 
-    # new day: first team from prev list, last team from prev list + teams from prev list moved 1 position right
-    new_day = [old_day[0],old_day[-1]]
-    for team in range(1,end):
-        new_day.append(old_day[team])
+    old_day = teams.copy()
+    end = len(teams) - 1
 
-    # Done! Add new complete day to list.
-    schedule.append(new_day)
-    old_day = new_day
+    # add another days -> days: n-1 , where n is count of clubs
+    for day in range(1, end):
 
-print(schedule)
+        # new day: first team from prev list, last team from prev list + teams from prev list moved 1 position right
+        new_day = [old_day[0], old_day[-1]]
+        for team in range(1, end):
+            new_day.append(old_day[team])
+
+        # Done! Add new complete day to list.
+        schedule.append(new_day)
+        old_day = new_day
+
+    return schedule
+
+def dispSchedule(schedule):
+    # to display round
+    day = 1
+
+    for i in schedule:
+        count = 1
+        print("Kolejka:", day)
+
+        # call next teams in round, display 2 teams in 1 line
+        for j in i:
+            if count % 2 != 0:
+                print(j, "- ", end="")
+                count = count + 1
+            else:
+                print(j)
+                count = count + 1
+        print(end="\n")
+        day = day + 1
+
+# MAIN FUNCTION #
+teams = importFile()
+schedule = makeSchedule(teams)
+dispSchedule(schedule)
+
+
