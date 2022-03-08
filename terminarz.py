@@ -2,7 +2,12 @@ import random
 
 def importFile():
     path = "teams.txt"
-    f = open(path, "r", encoding="utf-8")
+
+    try:
+        f = open(path, "r", encoding="utf-8")
+    except FileNotFoundError:
+        teams = ["Brak pliku!"]
+        return teams
 
     # teams - list of imported clubs from file
     teams = []
@@ -15,6 +20,7 @@ def importFile():
     if len(teams) % 2 != 0:
         teams.append("X")
 
+    f.close()
     return teams
 
 def makeSchedule(teams):
@@ -63,9 +69,32 @@ def dispSchedule(schedule):
         print(end="\n")
         day = day + 1
 
+def exportSchedule(schedule):
+    # same as dispSchedule but does not display on screen, now export to file
+    # print parameter FILE -> redirect a stream to a file - helpfull!
+    f = open("export.txt", "w")
+
+    day = 1
+
+    for i in schedule:
+        count = 1
+        print("Kolejka:", day, file = f)
+
+        # call next teams in round, display 2 teams in 1 line
+        for j in i:
+            if count % 2 != 0:
+                print(j, "- ", end="" , file = f)
+                count = count + 1
+            else:
+                print(j , file = f)
+                count = count + 1
+        print(end="\n" , file = f)
+        day = day + 1
+
+    f.close()
+
 # MAIN FUNCTION #
 teams = importFile()
 schedule = makeSchedule(teams)
 dispSchedule(schedule)
-
-
+exportSchedule(schedule)
