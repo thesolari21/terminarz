@@ -1,7 +1,16 @@
 import random
 
-def importFile():
+
+def import_file():
+    """
+    Load text file from ./teams.txt.
+    Convert to list Teams.
+    If an odd number of teams, add team X.
+    :return: list
+    """
+
     path = "teams.txt"
+    teams = []
 
     try:
         f = open(path, "r", encoding="utf-8")
@@ -9,10 +18,6 @@ def importFile():
         teams = ["Brak pliku!"]
         return teams
 
-    # teams - list of imported clubs from file
-    teams = []
-
-    # here I import clubs, atrr strip() - delete char of new line
     for line in f:
         line = line.strip("\n")
         teams.append(line)
@@ -23,78 +28,93 @@ def importFile():
     f.close()
     return teams
 
-def makeSchedule(teams):
-    # shuffle element in list
+
+def make_schedule(teams):
+    """
+    Based on round robin tournament - https://en.wikipedia.org/wiki/Round-robin_tournament
+    New round: first team from prev list, last team from prev list + teams from prev list moved 1 position right
+    Extra: shuffle list, fix problem: only home games for first player
+    :param teams: list
+    :returns schedule: list
+    """
+
     random.shuffle(teams)
-
-    # schedule - list with another lists in correct order
     schedule = []
-
-    # add first
     schedule.append(teams)
 
-    old_day = teams.copy()
+    old_round = teams.copy()
     end = len(teams) - 1
 
-    # add another days -> days: n-1 , where n is count of clubs
     for day in range(1, end):
-
-        # new day: first team from prev list, last team from prev list + teams from prev list moved 1 position right
-        new_day = [old_day[0], old_day[-1]]
+        new_round = [old_round[0], old_round[-1]]
         for team in range(1, end):
-            new_day.append(old_day[team])
+            new_round.append(old_round[team])
 
-        # Done! Add new complete day to list.
-        schedule.append(new_day)
-        old_day = new_day
+        old_round = new_round
+        schedule.append(new_round)
+
+        # fix only home games for first player
+        if day % 2 == 0:
+            schedule[day-1][0],  schedule[day-1][1] = schedule[day-1][1],  schedule[day-1][0]
 
     return schedule
 
-def dispSchedule(schedule):
-    # to display round
-    day = 1
 
-    for i in schedule:
+def disp_schedule(schedule):
+    """
+    Display schedule with formatting
+    :param schedule: list
+    :return: None
+    """
+
+    round_number = 1
+
+    for round in schedule:
         count = 1
-        print("Kolejka:", day)
+        print("Kolejka:", round_number)
 
-        # call next teams in round, display 2 teams in 1 line
-        for j in i:
+        for team in round:
             if count % 2 != 0:
-                print(j, "- ", end="")
+                print(team, "- ", end="")
                 count = count + 1
             else:
-                print(j)
+                print(team)
                 count = count + 1
         print(end="\n")
-        day = day + 1
+        round_number = round_number + 1
 
-def exportSchedule(schedule):
-    # same as dispSchedule but does not display on screen, now export to file
-    # print parameter FILE -> redirect a stream to a file - helpfull!
+
+def export_schedule(schedule):
+    """
+    Export schedule to text file with formatting
+    (formatting like disp_schedule)
+    :param schedule: list
+    :return: None
+    """
+
     f = open("export.txt", "w")
 
-    day = 1
+    round_number = 1
 
-    for i in schedule:
+    for round in schedule:
         count = 1
-        print("Kolejka:", day, file = f)
+        print("Kolejka:", round_number, file=f)
 
-        # call next teams in round, display 2 teams in 1 line
-        for j in i:
+        for team in round:
             if count % 2 != 0:
-                print(j, "- ", end="" , file = f)
+                print(team, "- ", end="", file=f)
                 count = count + 1
             else:
-                print(j , file = f)
+                print(team, file=f)
                 count = count + 1
-        print(end="\n" , file = f)
-        day = day + 1
+        print(end="\n", file=f)
+        round_number = round_number + 1
 
     f.close()
 
-# MAIN FUNCTION #
-teams = importFile()
-schedule = makeSchedule(teams)
-dispSchedule(schedule)
-exportSchedule(schedule)
+
+if __name__ == "__main__":
+    teams = import_file()
+    schedule = make_schedule(teams)
+    disp_schedule(schedule)
+    export_schedule(schedule)
